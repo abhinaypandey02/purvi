@@ -27,15 +27,11 @@ function App() {
       mapped_files.push({
 
         url:URL.createObjectURL(file),
-        data:{Name:file.name}
+        data:{'Name':file.name}
       })
     }
     setSelectedFile(0)
     setFiles(o=>[...o,...mapped_files])
-  }
-  function generateCSV(){
-    console.log(files)
-
   }
   return (
     <div className="App min-h-screen flex flex-col max-w-screen-xl mx-auto px-5">
@@ -54,7 +50,7 @@ function App() {
         <img src={files[selectedFile].url}/>
               <div className={'flex items-center'}>
                 <div className={'grid grid-cols-2 gap-5'}>
-                  {value_inputs.map((val,i)=><div className={'flex flex-col items-start gap-2'} key={selectedFile+i}>
+                  {value_inputs.map((val,i)=><div className={'flex flex-col items-start gap-2'} key={''+selectedFile+i}>
                     <label className={'font-medium'}>{val.title}</label>
                     <input className={'rounded-lg border border-blue-900 py-3 px-5'} placeholder={'Enter value for '+val.title}  value={files[selectedFile].data[val.title]} onChange={e=>setFiles(o=>{
                     o[selectedFile].data[val.title]=e.target.value
