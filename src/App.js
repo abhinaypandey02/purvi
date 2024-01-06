@@ -53,7 +53,7 @@ function App() {
       {selectedFile>-1&&
           <div className={'flex grow items-center gap-4'}>
             {selectedFile>0&&<img onClick={()=>setSelectedFile(o=>o-1)} className={'cursor-pointer  scale-x-[-1]'} width="50" height="50" src="https://img.icons8.com/ios/50/circled-chevron-right--v1.png" alt="circled-chevron-right--v1"/>}
-            <div className={'grid grid-cols-1 md:grid-cols-2 gap-10'}>
+            <div className={'grid grow grid-cols-1 md:grid-cols-2 gap-10'}>
         <img src={files[selectedFile].url}/>
               <div className={'flex items-center'}>
                 <div className={'grid grid-cols-2 gap-5'}>
