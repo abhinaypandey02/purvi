@@ -35,7 +35,7 @@ function App() {
   }
   return (
     <div className="App min-h-screen flex flex-col max-w-screen-xl mx-auto px-5">
-      <input type={'file'} multiple={true} onChange={handleFileChange} className={'hidden'} ref={inputRef}/>
+      <input directory={true} webkitdirectory={true} type={'file'} multiple={true} onChange={handleFileChange} className={'hidden'} ref={inputRef}/>
       <div className={'py-5 flex justify-between'}>
         <div className={'text-4xl font-bold'}>Purvi</div>
         <div className={'flex items-center gap-5'}>
