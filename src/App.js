@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import { CSVLink } from "react-csv";
 const value_inputs = [
   {
@@ -33,9 +33,16 @@ function App() {
     setSelectedFile(0)
     setFiles(o=>[...o,...mapped_files])
   }
+
+  useEffect(() => {
+    if(inputRef.current){
+      inputRef.current.setAttribute("directory", "");
+      inputRef.current.setAttribute("webkitdirectory", "");
+    }
+  }, []);
   return (
     <div className="App min-h-screen flex flex-col max-w-screen-xl mx-auto px-5">
-      <input directory={true} webkitdirectory={true} type={'file'} multiple={true} onChange={handleFileChange} className={'hidden'} ref={inputRef}/>
+      <input  type={'file'} multiple={true} onChange={handleFileChange} className={'hidden'} ref={inputRef}/>
       <div className={'py-5 flex justify-between'}>
         <div className={'text-4xl font-bold'}>Purvi</div>
         <div className={'flex items-center gap-5'}>
