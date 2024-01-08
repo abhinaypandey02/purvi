@@ -4,10 +4,30 @@ import {useEffect, useRef, useState} from "react";
 import { CSVLink } from "react-csv";
 const value_inputs = [
   {
-    title:'Value 1',
+    title:'Logical Flow and Decision Node Accuracy',
+    options:[
+      {
+        label:'Test',
+        value:'test'
+      },
+      {
+        label:'Test2',
+        value:'test2'
+      },
+    ]
   },
   {
     title:'Value 2',
+    options:[
+      {
+        label:'Test',
+        value:'test'
+      },
+      {
+        label:'Test2',
+        value:'test2'
+      },
+    ]
   },
   {
     title:'Value 3',
@@ -44,7 +64,7 @@ function App() {
     <div className="App min-h-screen flex flex-col max-w-screen-xl mx-auto px-5">
       <input  type={'file'} multiple={true} onChange={handleFileChange} className={'hidden'} ref={inputRef}/>
       <div className={'py-5 flex justify-between'}>
-        <div className={'text-4xl font-bold'}>Purvi</div>
+        <div className={'text-4xl font-bold'}>Flowchart Quality Checker</div>
         <div className={'flex items-center gap-5'}>
           <button onClick={()=>inputRef.current?.click()}>Add Images</button>
           <CSVLink data={files.map(file=>file.data)}>Download CSV</CSVLink>
@@ -57,12 +77,25 @@ function App() {
         <img src={files[selectedFile].url}/>
               <div className={'flex items-center'}>
                 <div className={'grid grid-cols-2 gap-5'}>
-                  {value_inputs.map((val,i)=><div className={'flex flex-col items-start gap-2'} key={''+selectedFile+i}>
-                    <label className={'font-medium'}>{val.title}</label>
-                    <input className={'rounded-lg border border-blue-900 py-3 px-5'} placeholder={'Enter value for '+val.title}  value={files[selectedFile].data[val.title]} onChange={e=>setFiles(o=>{
-                    o[selectedFile].data[val.title]=e.target.value
-                    return [...o]
-                  })}/></div>)}
+                  {value_inputs.map((val,i)=><div className={'flex flex-col justify-between items-start gap-2'} key={''+selectedFile+i}>
+                    <label className={'font-medium text-start'}>{val.title}</label>
+                    {val.options?<select  className={'rounded-lg w-full border border-blue-900 py-3 px-5'} value={files[selectedFile].data[val.title]}
+                                         onChange={e => setFiles(o => {
+                                           o[selectedFile].data[val.title] = e.target.value
+                                           return [...o]
+                                         })}>
+                      <option >
+                        Select
+                      </option>
+                      {val.options.map(o=><option value={o.value}>{o.label}</option>)}
+                    </select>:<input className={'rounded-lg w-full border border-blue-900 py-3 px-5'}
+                            placeholder={'Enter value for ' + val.title} value={files[selectedFile].data[val.title]}
+                            onChange={e => setFiles(o => {
+                              o[selectedFile].data[val.title] = e.target.value
+                              return [...o]
+                            })}/>}
+
+                  </div>)}
                 </div>
               </div>
           </div>
