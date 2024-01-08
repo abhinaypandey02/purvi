@@ -31,9 +31,31 @@ const value_inputs = [
   },
   {
     title:'Value 3',
+
+    options:[
+      {
+        label:'Test',
+        value:'test'
+      },
+      {
+        label:'Test2',
+        value:'test2'
+      },
+    ]
   },
   {
     title:'Value 4',
+
+    options:[
+      {
+        label:'Test',
+        value:'test'
+      },
+      {
+        label:'Test2',
+        value:'test2'
+      },
+    ]
   },
 ]
 function App() {
