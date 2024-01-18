@@ -2,12 +2,16 @@ import logo from './logo.svg';
 import './App.css';
 import {useEffect, useRef, useState} from "react";
 import { CSVLink } from "react-csv";
-const value_inputs = [
+import {database} from "./firebase";
+import {get,set,ref} from 'firebase/database'
+import Mermaid from "react-mermaid2"
+const flowchart_inputs = [
   {
     title:'Logical Flow and Decision Node Accuracy',
+    key:'logical_score',
     options:[
       {
-        label:'Test',
+        label:'Excellent - The flowchart is clear, logical, well-structured, and aligns with process goals.',
         value:'test'
       },
       {
@@ -17,35 +21,8 @@ const value_inputs = [
     ]
   },
   {
-    title:'Value 2',
-    options:[
-      {
-        label:'Test',
-        value:'test'
-      },
-      {
-        label:'Test2',
-        value:'test2'
-      },
-    ]
-  },
-  {
-    title:'Value 3',
-
-    options:[
-      {
-        label:'Test',
-        value:'test'
-      },
-      {
-        label:'Test2',
-        value:'test2'
-      },
-    ]
-  },
-  {
-    title:'Value 4',
-
+    title:'Overalll what is',
+    key:'overall_score',
     options:[
       {
         label:'Test',
@@ -58,71 +35,140 @@ const value_inputs = [
     ]
   },
 ]
+
+const other_answers=[
+  {
+    label:"Applied scenario",
+    key:'applied_scenario'
+  },
+  {
+    label:"Fact retrieval",
+    key:'fact_retrieval'
+  },
+]
+
+const answer_inputs = [
+  {
+    title:'Logical Flow and Decision Node Accuracy',
+    key:'answer_correctness',
+    options:[
+      {
+        label:'Test',
+        value:'test',
+        info:"I HAVE INFO"
+      },
+      {
+        label:'Test2',
+        value:'test2'
+      },
+    ]
+  },
+  {
+    title:'Logical Flow and Decision Node Accuracy',
+    key:'overall',
+    options:[
+      {
+        label:'Test',
+        value:'test'
+      },
+      {
+        label:'Test2',
+        value:'test2'
+      },
+    ]
+  },
+]
+function Help({info}){
+  const [show,setShow]=useState(false)
+  return <div onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} className={'text-lg relative font-bold cursor-help'}>
+    ?
+    {show&&<div className={'absolute left-full -translate-y-1/2 text-xs font-normal border w-[300px] top-1/2 translate-x-2 bg-white p-2 rounded'}>{info}</div>}
+  </div>
+}
+function Selector({inputs, path,defaultValues}){
+  return <div>
+    {inputs.map(input=><div  onChange={(e)=>{
+      set(ref(database,path+'/'+input.key),e.target.value)
+    }}>
+      <div>{input.title}</div>
+      {input.options.map(o=><div className={'flex gap-2'}>
+        <input checked={defaultValues[input.key]===o.value} value={o.value} type={'radio'} name={path+input.key} placeholder={'Test'}/>
+        <div>{o.label}</div>
+        {o.info&&<Help info={o.info}/> }
+      </div>)}
+    </div>)}
+  </div>
+}
+
+function AnswerInputRenderer({path, answers}){
+  return <div>
+    {answers.map((answer,i)=>answer&&<div>
+      <h2>Question: {answer.Q}</h2>
+      {Object.keys(answer).map(key=>key.startsWith('A')&&<p>{key}: {answer[key]}</p>)}
+      <Selector path={path+'/'+i+'/scores'} inputs={answer_inputs} defaultValues={answer['scores']}/>
+    </div>)}
+  </div>
+}
+
 function App() {
   const inputRef = useRef()
   const [files,setFiles]=useState([])
-  const [selectedFile,setSelectedFile]=useState(-1)
-  function handleFileChange(e){
-    const input_files = e.target.files
-    const mapped_files = []
-    for(const file of input_files){
-      mapped_files.push({
-
-        url:URL.createObjectURL(file),
-        data:{'Name':file.name}
-      })
-    }
-    setSelectedFile(0)
-    setFiles(o=>[...o,...mapped_files])
-  }
-
+  const [selectedFile,setSelectedFile]=useState()
+  const [idText,setIdText]=useState('')
+  const [completed,setCompleted]=useState()
+  const [total,setTotal]=useState()
   useEffect(() => {
-    if(inputRef.current){
-      inputRef.current.setAttribute("directory", "");
-      inputRef.current.setAttribute("webkitdirectory", "");
-    }
+    get(ref(database,'/')).then(snapshot=>{
+      const val = snapshot.val()
+      setTotal(Object.keys(val).length)
+      setCompleted(Object.values(val).filter(val=>val.scores?.flag).length)
+    })
   }, []);
+  function onSet(){
+    get(ref(database,'/'+idText)).then(snapshot=>{
+      setSelectedFile(snapshot.val())
+    })
+  }
+  function onSubmit(){
+    get(ref(database,'/'+idText)).then(snapshot=>{
+      setSelectedFile(snapshot.val())
+      const f = snapshot.val()
+      console.log(Object.values(f['scores']))
+      let all_done = Object.values(f['scores']).every(x=>Boolean(x)||x===0) && other_answers.every(answer=>Object.values(f['QA'][answer.key]['scores']).every(Boolean))
+      if(all_done){
+        set(ref(database,'/'+idText+'/scores/flag'),1)
+      } else {
+        alert('Please complete all')
+      }
+    })
+  }
   return (
-    <div className="App min-h-screen flex flex-col max-w-screen-xl mx-auto px-5">
-      <input  type={'file'} multiple={true} onChange={handleFileChange} className={'hidden'} ref={inputRef}/>
+    <div className="App h-screen flex flex-col max-w-screen-xl mx-auto px-5">
       <div className={'py-5 flex justify-between'}>
         <div className={'text-4xl font-bold'}>Flowchart Quality Checker</div>
-        <div className={'flex items-center gap-5'}>
-          <button onClick={()=>inputRef.current?.click()}>Add Images</button>
-          <CSVLink data={files.map(file=>file.data)}>Download CSV</CSVLink>
-        </div>
+        <div className={'text-4xl font-bold'}>{completed}/{total}</div>
       </div>
-      {selectedFile>-1&&
-          <div className={'flex grow items-center gap-4'}>
-            {selectedFile>0&&<img onClick={()=>setSelectedFile(o=>o-1)} className={'cursor-pointer  scale-x-[-1]'} width="50" height="50" src="https://img.icons8.com/ios/50/circled-chevron-right--v1.png" alt="circled-chevron-right--v1"/>}
-            <div className={'grid grow grid-cols-1 md:grid-cols-2 gap-10'}>
-        <img src={files[selectedFile].url}/>
-              <div className={'flex items-center'}>
-                <div className={'grid grid-cols-2 gap-5'}>
-                  {value_inputs.map((val,i)=><div className={'flex flex-col justify-between items-start gap-2'} key={''+selectedFile+i}>
-                    <label className={'font-medium text-start'}>{val.title}</label>
-                    {val.options?<select  className={'rounded-lg w-full border border-blue-900 py-3 px-5'} value={files[selectedFile].data[val.title]}
-                                         onChange={e => setFiles(o => {
-                                           o[selectedFile].data[val.title] = e.target.value
-                                           return [...o]
-                                         })}>
-                      <option >
-                        Select
-                      </option>
-                      {val.options.map(o=><option value={o.value}>{o.label}</option>)}
-                    </select>:<input className={'rounded-lg w-full border border-blue-900 py-3 px-5'}
-                            placeholder={'Enter value for ' + val.title} value={files[selectedFile].data[val.title]}
-                            onChange={e => setFiles(o => {
-                              o[selectedFile].data[val.title] = e.target.value
-                              return [...o]
-                            })}/>}
+      <input value={idText} onChange={e=>setIdText(e.target.value)} placeholder={'ID'}/>
+      <button onClick={onSet}>Set</button>
+      {selectedFile&&<div className={'grid grid-cols-2 overflow-auto pb-10'}>
+        <div className={'overflow-y-scroll'}>
 
-                  </div>)}
-                </div>
-              </div>
-          </div>
-            {selectedFile<files.length-1&&<img onClick={()=>setSelectedFile(o=>o+1)} className={'cursor-pointer'} width="50" height="50" src="https://img.icons8.com/ios/50/circled-chevron-right--v1.png" alt="circled-chevron-right--v1"/>}
-          </div>}
+          <Mermaid chart={selectedFile?.mermaid?.split('\n').join(`
+        `)}/>
+        </div>
+        <div className={'overflow-y-scroll overflow-x-visible'}>
+          <h3>Flow chart questions</h3>
+          <Selector path={`/${idText}/scores`} defaultValues={selectedFile.scores} inputs={flowchart_inputs}/>
+          <hr/>
+          <h3>Other questions</h3>
+          {other_answers.map(answer=><div>
+            <h5>{answer.label}</h5>
+            <AnswerInputRenderer answers={selectedFile[answer.key]} path={`/${idText}/${answer.key}`}/>
+            <hr/>
+          </div>)}
+        </div>
+      </div>}
+      <button onClick={onSubmit}>Submit</button>
     </div>
   );
 }
