@@ -1,10 +1,8 @@
-import logo from './logo.svg';
 import './App.css';
-import {useEffect, useRef, useState} from "react";
-import { CSVLink } from "react-csv";
+import React, {useEffect, useState} from "react";
 import {database} from "./firebase";
 import {get,set,ref} from 'firebase/database'
-import Mermaid from "react-mermaid2"
+import mermaid from 'mermaid'
 const flowchart_inputs = [
   {
     title:'Logical Flow and Decision Node Accuracy',
@@ -116,6 +114,10 @@ function App() {
   const [completed,setCompleted]=useState()
   const [total,setTotal]=useState()
   useEffect(() => {
+    mermaid.run();
+  }, [selectedFile]);
+  useEffect(() => {
+    mermaid.initialize({ startOnLoad: true })
     get(ref(database,'/')).then(snapshot=>{
       const val = snapshot.val()
       setTotal(Object.keys(val).length)
@@ -150,9 +152,9 @@ function App() {
       <button onClick={onSet}>Set</button>
       {selectedFile&&<div className={'grid grid-cols-2 overflow-auto pb-10'}>
         <div className={'overflow-y-scroll'}>
-
-          <Mermaid chart={selectedFile?.mermaid?.split('\n').join(`
-        `)}/>
+        <pre className="mermaid">
+          {selectedFile?.mermaid}
+        </pre>
         </div>
         <div className={'overflow-y-scroll overflow-x-visible'}>
           <h3>Flow chart questions</h3>
