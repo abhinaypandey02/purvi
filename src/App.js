@@ -111,8 +111,6 @@ function AnswerInputRenderer({path, answers}){
 }
 
 function App() {
-  const inputRef = useRef()
-  const [files,setFiles]=useState([])
   const [selectedFile,setSelectedFile]=useState()
   const [idText,setIdText]=useState('')
   const [completed,setCompleted]=useState()
