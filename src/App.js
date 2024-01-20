@@ -84,26 +84,30 @@ function Help({info}){
   </div>
 }
 function Selector({inputs, path,defaultValues}){
-  return <div>
-    {inputs.map(input=><div  onChange={(e)=>{
+  return <div className={'grid grid-cols-2 gap-3'}>
+    {inputs.map(input=><div className={'bg-white rounded-md border shadow py-3 px-6'}  onChange={(e)=>{
       set(ref(database,path+'/'+input.key),e.target.value)
     }}>
-      <div>{input.title}</div>
-      {input.options.map(o=><div className={'flex gap-2'}>
-        <input checked={defaultValues[input.key]===o.value} value={o.value} type={'radio'} name={path+input.key} placeholder={'Test'}/>
-        <div>{o.label}</div>
-        {o.info&&<Help info={o.info}/> }
-      </div>)}
+      <div className={'text- font-medium text-start mb-3'}>{input.title}</div>
+      <div className={'flex flex-col gap-1'}>
+
+        {input.options.map(o=><div className={'flex items-center gap-2'}>
+          <input className={'text-left'} defaultChecked={defaultValues[input.key]===o.value} value={o.value} type={'radio'} name={path+input.key} placeholder={'Test'}/>
+          <div className={'text-left'}>{o.label}</div>
+          {o.info&&<Help info={o.info}/> }
+        </div>)}
+      </div>
     </div>)}
   </div>
 }
 
 function AnswerInputRenderer({path, answers}){
   return <div>
-    {answers.map((answer,i)=>answer&&<div>
-      <h2>Question: {answer.Q}</h2>
-      {Object.keys(answer).map(key=>key.startsWith('A')&&<p>{key}: {answer[key]}</p>)}
+    {answers.map((answer,i)=>answer&&<div className={'text-left'}>
+      <h2 className={'mb-2'}><b><u>Question:</u></b> {answer.Q}</h2>
+      {Object.keys(answer).map(key=>key.startsWith('A')&&<p><b>{key}:</b> {answer[key]}</p>)}<br/>
       <Selector path={path+'/'+i+'/scores'} inputs={answer_inputs} defaultValues={answer['scores']}/>
+      <hr className={'my-8'}/>
     </div>)}
   </div>
 }
@@ -113,6 +117,7 @@ function App() {
   const [idText,setIdText]=useState('')
   const [completed,setCompleted]=useState()
   const [total,setTotal]=useState()
+  const [loading,setLoading]=useState(false)
   useEffect(() => {
     mermaid.run();
   }, [selectedFile]);
@@ -125,9 +130,17 @@ function App() {
     })
   }, []);
   function onSet(){
+    setLoading(true)
     get(ref(database,'/'+idText)).then(snapshot=>{
+      if(!snapshot.val()){
+        return alert('Invalid code')
+      }
       setSelectedFile(snapshot.val())
+
     })
+        .finally(()=>{
+          setLoading(false)
+        })
   }
   function onSubmit(){
     get(ref(database,'/'+idText)).then(snapshot=>{
@@ -143,13 +156,18 @@ function App() {
     })
   }
   return (
-    <div className="App h-screen flex flex-col max-w-screen-xl mx-auto px-5">
+    <div className="App h-screen flex flex-col max-w-screen-xl mx-auto px-5 text-start">
       <div className={'py-5 flex justify-between'}>
         <div className={'text-4xl font-bold'}>Flowchart Quality Checker</div>
         <div className={'text-4xl font-bold'}>{completed}/{total}</div>
       </div>
-      <input value={idText} onChange={e=>setIdText(e.target.value)} placeholder={'ID'}/>
-      <button onClick={onSet}>Set</button>
+      <form className={'flex gap-3 items-center'} onSubmit={e=>{
+        e.preventDefault()
+        onSet()
+      }}>
+        <input disabled={loading} className={'grow bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5'} value={idText} onChange={e=>setIdText(e.target.value)} placeholder={'Enter ID'}/>
+        <button disabled={loading} className={'text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center'} onClick={onSet}>Set</button>
+      </form>
       {selectedFile&&<div className={'grid grid-cols-2 overflow-auto pb-10'}>
         <div className={'overflow-y-scroll'}>
         <pre className="mermaid">
@@ -157,18 +175,18 @@ function App() {
         </pre>
         </div>
         <div className={'overflow-y-scroll overflow-x-visible'}>
-          <h3>Flow chart questions</h3>
-          <Selector path={`/${idText}/scores`} defaultValues={selectedFile.scores} inputs={flowchart_inputs}/>
-          <hr/>
-          <h3>Other questions</h3>
+            <h3 className={'text-3xl font-semibold mb-8 mt-8'}>Flow chart questions</h3>
+            <Selector path={`/${idText}/scores`} defaultValues={selectedFile.scores} inputs={flowchart_inputs}/>
+          <h3 className={'text-3xl font-semibold mb-4 mt-8'}>Other questions</h3>
           {other_answers.map(answer=><div>
-            <h5>{answer.label}</h5>
+            <h5 className={'text-2xl font-medium underline mb-5 mt-8'}>{answer.label}</h5>
             <AnswerInputRenderer answers={selectedFile[answer.key]} path={`/${idText}/${answer.key}`}/>
-            <hr/>
           </div>)}
+          <button className={'w-full text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:w-auto px-5 py-2.5 text-center'} onClick={onSubmit}>Submit</button>
+
         </div>
       </div>}
-      <button onClick={onSubmit}>Submit</button>
+
     </div>
   );
 }
