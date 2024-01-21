@@ -125,7 +125,7 @@ const answer_inputs = [
       },
       {
         label: 'Somewhat',
-        value: -1
+        value: 2
       }
     ]
   },
@@ -143,7 +143,7 @@ const answer_inputs = [
       },
       {
         label: 'Somewhat',
-        value: -1
+        value: 2
       }
     ]
   },
@@ -272,8 +272,7 @@ function App() {
     get(ref(database,'/'+idText)).then(async snapshot=>{
       setSelectedFile(snapshot.val())
       const f = snapshot.val()
-      console.log(f)
-      let all_done = Object.values(f['scores']).every(x=>Boolean(x)||x===0) && other_answers.every(answer=>f[answer.key].every(q=>Object.values(q['scores']).every(x=>Boolean(x)||x===0)))
+      let all_done = Object.values(f['scores']).every(x=>x>=0) && other_answers.every(answer=>f[answer.key].every(q=>Object.values(q['scores']).every(x=>x>=0)))
       if(all_done){
         await set(ref(database,'/'+idText+'/scores/flag'),1)
         alert('Done')
