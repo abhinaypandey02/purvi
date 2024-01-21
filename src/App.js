@@ -30,19 +30,24 @@ const flowchart_inputs = [
     key:'complexity',
     options:[
       {
-        label:'Excellent',
+        label:'Appropriate',
         value:3,
-        info: 'The flowcharts complexity and length are appropriate, reflecting the process needs without unnecessary elements.'
+        info: 'Appropriately Complex - The flowchart complexity and length are appropriate, reflecting the process needs without unnecessary elements.'
       },
       {
-        label:'Good',
+        label:'High',
         value:2,
-        info: 'The flowchart is slightly more complex or longer than necessary, which may slightly affect comprehension or scalability.'
+        info: 'Slightly More Complex But Still Useable - The flowchart is slightly more complex or longer than necessary, which may slightly affect comprehension or scalability.'
       },
       {
-        label: 'Poor',
+        label: 'Very High',
         value: 1,
-        info: 'The flowchart is too complex or lengthy, significantly hindering comprehension and requiring simplification.'
+        info: 'Unnecessarily High Complexity that affects Usability - The flowchart is too complex or lengthy, significantly hindering comprehension and requiring simplification.'
+      },
+      {
+        label: 'Error Laden',
+        value: 0,
+        info: 'The flowchart has other issues related to complexity which affects usability.'
       }
     ]
   },
@@ -147,16 +152,24 @@ const answer_inputs = [
     key: 'complexity_quality',
     options:[
       {
-        label:'True',
-        value:1
+        label:'Excellent',
+        value:3,
+        info: 'Complex, requires thorough analysis, clear and precise.'
       },
       {
-        label:'False',
-        value:0
+        label:'Good',
+        value:2,
+        info: 'Moderately complex, answer not immediately apparent, clear and precise.'
       },
       {
-        label: 'Somewhat',
-        value: -1
+        label: 'Average',
+        value:1,
+        info: 'Straightforward, lacks complexity.'
+      },
+      {
+        label: 'Poor',
+        value: 0,
+        info: 'Overly complex or unclear, difficult to ascertain correctness.'
       }
     ]
   },
@@ -165,16 +178,24 @@ const answer_inputs = [
     key: 'overall',
     options:[
       {
-        label:'True',
-        value:1
+        label:'The final set MUST have this QA pair.',
+        value:3,
+        info:'The question is excellent in quality, complexity, and correctness, making it a prime candidate for AI testing.'
       },
       {
-        label:'False',
-        value:0
+        label:'The final resource may have this QA pair.',
+        value:2,
+        info: 'The question is generally good but might require minor improvements. Still valid for AI testing'
       },
       {
-        label: 'Somewhat',
-        value: -1
+        label: 'This QA pair can be omitted based on our selection criteria',
+        value:1,
+        info: 'The question and/or answer have significant issues and should be reconsidered or excluded.'
+      },
+      {
+        label:'This QA pair must be omitted',
+        value:0,
+        info: 'The question is redundant as a better version exists in another category or it fails to meet the basic criteria for inclusion.'
       }
     ]
   }
@@ -261,12 +282,17 @@ function App() {
     })
     */
     set(ref(database,'/'+idText+'/scores/flag'),1)
+    alert("Done!")
   }
   
   return (
     <div className="App h-screen flex flex-col max-w-screen-xl mx-auto px-5 text-start">
       <div className={'py-5 flex justify-between'}>
         <div className={'text-4xl font-bold'}>Flowchart Quality Checker</div>
+        <div className={'flex justify-between'}>
+      <a href='https://humdrum-bottom-a65.notion.site/Flowchart-Quality-Evaluation-Rubric-059f0fd3db2148a9bc511bacbc8f807f?pvs=4' target='_blank' rel='noopener noreferrer' className={'text-2xl px-2 py-1 hover:bg-blue-500 hover:text-white transition-colors duration-300 ease-in-out'}>Flowchart Rubric</a>
+      <a href='https://humdrum-bottom-a65.notion.site/Q-A-Quality-Evaluation-Rubric-4ff0976d121a46e08216ac2fdd2a9a47?pvs=4' target='_blank' rel='noopener noreferrer' className={'text-2xl px-2 py-1 hover:bg-blue-500 hover:text-white transition-colors duration-300 ease-in-out'}style={{ marginLeft: '30px' }}>QA Rubric</a>
+    </div>
         <div className={'text-4xl font-bold'}>{completed}/{total}</div>
       </div>
       <form className={'flex gap-3 items-center'} onSubmit={e=>{
