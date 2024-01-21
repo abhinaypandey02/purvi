@@ -9,29 +9,85 @@ const flowchart_inputs = [
     key:'logical_score',
     options:[
       {
-        label:'Excellent - The flowchart is clear, logical, well-structured, and aligns with process goals.',
-        value:'test'
+        label:'Excellent',
+        value:3,
+        info: 'The flowchart demonstrates a clear and logical sequence with all decision nodes and loops used correctly. Minor imperfections do not hinder overall clarity.'
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'Good',
+        value:2,
+        info: 'There are some issues with logical flow or decision node accuracy, leading to occasional clarity problems, but the main intent and logic of the flowchart remain intact.'
       },
+      {
+        label: 'Poor',
+        value: 1,
+        info: 'The flowchart suffers from frequent logical inconsistencies or misuse of decision nodes and loops, significantly impacting the ability to follow the process accurately.'
+      }
     ]
   },
   {
-    title:'Overalll what is',
-    key:'overall_score',
+    title:'Complexity and Length',
+    key:'complexity',
     options:[
       {
-        label:'Test',
-        value:'test'
+        label:'Excellent',
+        value:3,
+        info: 'The flowcharts complexity and length are appropriate, reflecting the process needs without unnecessary elements.'
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'Good',
+        value:2,
+        info: 'The flowchart is slightly more complex or longer than necessary, which may slightly affect comprehension or scalability.'
       },
+      {
+        label: 'Poor',
+        value: 1,
+        info: 'The flowchart is too complex or lengthy, significantly hindering comprehension and requiring simplification.'
+      }
     ]
   },
+  {
+    title: 'Allignment with Process Goals',
+    key: 'process_alignment',
+    options:[
+      {
+        label: 'Excellent',
+        value: 3,
+        info: 'The flowchart aligns perfectly or closely with the intended process goals.'
+      },
+      {
+        label: 'Good',
+        value: 2,
+        info: 'Some deviation from the process goals is present but does not completely misrepresent the process.'
+      },
+      {
+        label: 'Poor',
+        value: 1,
+        info: 'The flowchart has poor alignment with process goals, with several goals misrepresented or absent.'
+      }
+    ]
+  },
+  {
+    title: "Overall Score",
+    key: 'overall_score',
+    options:[
+      {
+        label: 'Excellent',
+        value: 3,
+        info: 'The flowchart is clear, logical, well-structured, and aligns with process goals.'
+      },
+      {
+        label: 'Good',
+        value: 2,
+        info: 'The flowchart is generally understandable with minor issues; improvements are possible.'
+      },
+      {
+        label: 'Poor',
+        value: 1,
+        info: 'The flowchart has significant issues across multiple areas and is difficult to interpret or use.'
+      }
+    ]
+  }
 ]
 
 const other_answers=[
@@ -43,38 +99,85 @@ const other_answers=[
     label:"Fact retrieval",
     key:'fact_retrieval'
   },
+  {
+    label: "Flow Referential",
+    key: 'flow_referential'
+  }
 ]
 
 const answer_inputs = [
   {
-    title:'Logical Flow and Decision Node Accuracy',
-    key:'answer_correctness',
+    title:'Correctness of the Question',
+    key:'question_correctness',
     options:[
       {
-        label:'Test',
-        value:'test',
-        info:"I HAVE INFO"
+        label:'True',
+        value:1
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'False',
+        value:0
       },
+      {
+        label: 'Somewhat',
+        value: -1
+      }
     ]
   },
   {
-    title:'Logical Flow and Decision Node Accuracy',
-    key:'overall',
+    title:'Correctness of Answer',
+    key:'answer_correctness',
     options:[
       {
-        label:'Test',
-        value:'test'
+        label:'True',
+        value:1
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'False',
+        value:0
       },
+      {
+        label: 'Somewhat',
+        value: -1
+      }
     ]
   },
+  {
+    title: 'Complexity and Quality of Question',
+    key: 'complexity_quality',
+    options:[
+      {
+        label:'True',
+        value:1
+      },
+      {
+        label:'False',
+        value:0
+      },
+      {
+        label: 'Somewhat',
+        value: -1
+      }
+    ]
+  },
+  {
+    title: 'Overall QA and Flowchart Pair Rating',
+    key: 'overall',
+    options:[
+      {
+        label:'True',
+        value:1
+      },
+      {
+        label:'False',
+        value:0
+      },
+      {
+        label: 'Somewhat',
+        value: -1
+      }
+    ]
+  }
 ]
 function Help({info}){
   const [show,setShow]=useState(false)
@@ -142,7 +245,9 @@ function App() {
           setLoading(false)
         })
   }
+  
   function onSubmit(){
+    /*
     get(ref(database,'/'+idText)).then(snapshot=>{
       setSelectedFile(snapshot.val())
       const f = snapshot.val()
@@ -154,7 +259,10 @@ function App() {
         alert('Please complete all')
       }
     })
+    */
+    set(ref(database,'/'+idText+'/scores/flag'),1)
   }
+  
   return (
     <div className="App h-screen flex flex-col max-w-screen-xl mx-auto px-5 text-start">
       <div className={'py-5 flex justify-between'}>
