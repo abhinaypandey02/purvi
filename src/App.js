@@ -9,29 +9,90 @@ const flowchart_inputs = [
     key:'logical_score',
     options:[
       {
-        label:'Excellent - The flowchart is clear, logical, well-structured, and aligns with process goals.',
-        value:'test'
+        label:'Excellent',
+        value:3,
+        info: 'The flowchart demonstrates a clear and logical sequence with all decision nodes and loops used correctly. Minor imperfections do not hinder overall clarity.'
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'Good',
+        value:2,
+        info: 'There are some issues with logical flow or decision node accuracy, leading to occasional clarity problems, but the main intent and logic of the flowchart remain intact.'
       },
+      {
+        label: 'Poor',
+        value: 1,
+        info: 'The flowchart suffers from frequent logical inconsistencies or misuse of decision nodes and loops, significantly impacting the ability to follow the process accurately.'
+      }
     ]
   },
   {
-    title:'Overalll what is',
-    key:'overall_score',
+    title:'Complexity and Length',
+    key:'complexity',
     options:[
       {
-        label:'Test',
-        value:'test'
+        label:'Appropriate',
+        value:3,
+        info: 'Appropriately Complex - The flowchart complexity and length are appropriate, reflecting the process needs without unnecessary elements.'
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'High',
+        value:2,
+        info: 'Slightly More Complex But Still Useable - The flowchart is slightly more complex or longer than necessary, which may slightly affect comprehension or scalability.'
       },
+      {
+        label: 'Very High',
+        value: 1,
+        info: 'Unnecessarily High Complexity that affects Usability - The flowchart is too complex or lengthy, significantly hindering comprehension and requiring simplification.'
+      },
+      {
+        label: 'Error Laden',
+        value: 0,
+        info: 'The flowchart has other issues related to complexity which affects usability.'
+      }
     ]
   },
+  {
+    title: 'Allignment with Process Goals',
+    key: 'process_alignment',
+    options:[
+      {
+        label: 'Excellent',
+        value: 3,
+        info: 'The flowchart aligns perfectly or closely with the intended process goals.'
+      },
+      {
+        label: 'Good',
+        value: 2,
+        info: 'Some deviation from the process goals is present but does not completely misrepresent the process.'
+      },
+      {
+        label: 'Poor',
+        value: 1,
+        info: 'The flowchart has poor alignment with process goals, with several goals misrepresented or absent.'
+      }
+    ]
+  },
+  {
+    title: "Overall Score",
+    key: 'overall_score',
+    options:[
+      {
+        label: 'Excellent',
+        value: 3,
+        info: 'The flowchart is clear, logical, well-structured, and aligns with process goals.'
+      },
+      {
+        label: 'Good',
+        value: 2,
+        info: 'The flowchart is generally understandable with minor issues; improvements are possible.'
+      },
+      {
+        label: 'Poor',
+        value: 1,
+        info: 'The flowchart has significant issues across multiple areas and is difficult to interpret or use.'
+      }
+    ]
+  }
 ]
 
 const other_answers=[
@@ -43,38 +104,101 @@ const other_answers=[
     label:"Fact retrieval",
     key:'fact_retrieval'
   },
+  {
+    label: "Flow Referential",
+    key: 'flow_referential'
+  }
 ]
 
 const answer_inputs = [
   {
-    title:'Logical Flow and Decision Node Accuracy',
-    key:'answer_correctness',
+    title:'Correctness of the Question',
+    key:'question_correctness',
     options:[
       {
-        label:'Test',
-        value:'test',
-        info:"I HAVE INFO"
+        label:'True',
+        value:1
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'False',
+        value:0
       },
+      {
+        label: 'Somewhat',
+        value: -1
+      }
     ]
   },
   {
-    title:'Logical Flow and Decision Node Accuracy',
-    key:'overall',
+    title:'Correctness of Answer',
+    key:'answer_correctness',
     options:[
       {
-        label:'Test',
-        value:'test'
+        label:'True',
+        value:1
       },
       {
-        label:'Test2',
-        value:'test2'
+        label:'False',
+        value:0
       },
+      {
+        label: 'Somewhat',
+        value: -1
+      }
     ]
   },
+  {
+    title: 'Complexity and Quality of Question',
+    key: 'complexity_quality',
+    options:[
+      {
+        label:'Excellent',
+        value:3,
+        info: 'Complex, requires thorough analysis, clear and precise.'
+      },
+      {
+        label:'Good',
+        value:2,
+        info: 'Moderately complex, answer not immediately apparent, clear and precise.'
+      },
+      {
+        label: 'Average',
+        value:1,
+        info: 'Straightforward, lacks complexity.'
+      },
+      {
+        label: 'Poor',
+        value: 0,
+        info: 'Overly complex or unclear, difficult to ascertain correctness.'
+      }
+    ]
+  },
+  {
+    title: 'Overall QA and Flowchart Pair Rating',
+    key: 'overall',
+    options:[
+      {
+        label:'The final set MUST have this QA pair.',
+        value:3,
+        info:'The question is excellent in quality, complexity, and correctness, making it a prime candidate for AI testing.'
+      },
+      {
+        label:'The final resource may have this QA pair.',
+        value:2,
+        info: 'The question is generally good but might require minor improvements. Still valid for AI testing'
+      },
+      {
+        label: 'This QA pair can be omitted based on our selection criteria',
+        value:1,
+        info: 'The question and/or answer have significant issues and should be reconsidered or excluded.'
+      },
+      {
+        label:'This QA pair must be omitted',
+        value:0,
+        info: 'The question is redundant as a better version exists in another category or it fails to meet the basic criteria for inclusion.'
+      }
+    ]
+  }
 ]
 function Help({info}){
   const [show,setShow]=useState(false)
@@ -142,7 +266,9 @@ function App() {
           setLoading(false)
         })
   }
+  
   function onSubmit(){
+    /*
     get(ref(database,'/'+idText)).then(snapshot=>{
       setSelectedFile(snapshot.val())
       const f = snapshot.val()
@@ -154,11 +280,19 @@ function App() {
         alert('Please complete all')
       }
     })
+    */
+    set(ref(database,'/'+idText+'/scores/flag'),1)
+    alert("Done!")
   }
+  
   return (
     <div className="App h-screen flex flex-col max-w-screen-xl mx-auto px-5 text-start">
       <div className={'py-5 flex justify-between'}>
         <div className={'text-4xl font-bold'}>Flowchart Quality Checker</div>
+        <div className={'flex justify-between'}>
+      <a href='https://humdrum-bottom-a65.notion.site/Flowchart-Quality-Evaluation-Rubric-059f0fd3db2148a9bc511bacbc8f807f?pvs=4' target='_blank' rel='noopener noreferrer' className={'text-2xl px-2 py-1 hover:bg-blue-500 hover:text-white transition-colors duration-300 ease-in-out'}>Flowchart Rubric</a>
+      <a href='https://humdrum-bottom-a65.notion.site/Q-A-Quality-Evaluation-Rubric-4ff0976d121a46e08216ac2fdd2a9a47?pvs=4' target='_blank' rel='noopener noreferrer' className={'text-2xl px-2 py-1 hover:bg-blue-500 hover:text-white transition-colors duration-300 ease-in-out'}style={{ marginLeft: '30px' }}>QA Rubric</a>
+    </div>
         <div className={'text-4xl font-bold'}>{completed}/{total}</div>
       </div>
       <form className={'flex gap-3 items-center'} onSubmit={e=>{
